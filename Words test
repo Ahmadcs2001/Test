@@ -1,0 +1,61 @@
+import tkinter as tk
+from tkinter import messagebox
+
+# Function to display the selected words
+def display_selected_words():
+    selected_words = [word for word, var in zip(words, check_vars) if var.get()]
+    messagebox.showinfo("Selected Words", "\n".join(selected_words))
+
+# Function to read words from a text file
+def read_words_from_file(filename):
+    with open(filename, 'r') as file:
+        return [line.strip() for line in file.readlines()]
+
+# Load your 18000 words into a list from the text file
+words_file_path = r'Path:\to\your\file.txt'
+words = read_words_from_file(words_file_path)
+
+# Create the main window
+root = tk.Tk()
+root.title("Vocabulary Assessment")
+
+# Create a frame for the checkboxes
+frame = tk.Frame(root)
+frame.pack(fill=tk.BOTH, expand=True)
+
+# Create a scrollbar
+scrollbar = tk.Scrollbar(frame)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+# Create a canvas
+canvas = tk.Canvas(frame, yscrollcommand=scrollbar.set)
+canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+scrollbar.config(command=canvas.yview)
+
+# Create a frame inside the canvas
+inner_frame = tk.Frame(canvas)
+canvas.create_window((0, 0), window=inner_frame, anchor='nw')
+
+# List to hold the IntVar objects for checkboxes
+check_vars = []
+
+# Add words and checkboxes to the frame
+for word in words:
+    var = tk.IntVar()
+    check_vars.append(var)
+    cb = tk.Checkbutton(inner_frame, text=word, variable=var)
+    cb.pack(anchor='w')
+
+# Function to update the scrollregion of the canvas
+def on_frame_configure(event):
+    canvas.configure(scrollregion=canvas.bbox("all"))
+
+inner_frame.bind("<Configure>", on_frame_configure)
+
+# Button to display the selected words
+button = tk.Button(root, text="Show Selected Words", command=display_selected_words)
+button.pack()
+
+# Run the application
+root.mainloop()
